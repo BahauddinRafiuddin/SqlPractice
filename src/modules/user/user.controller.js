@@ -1,5 +1,5 @@
 import { ApiError } from "../../utils/ApiError.js";
-import { getAllUserService } from "./user.service.js";
+import { deleteUserService, getAllUserService } from "./user.service.js";
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -24,6 +24,33 @@ export const getAllUsers = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal Server Error"
-    });
+    })
+  }
+}
+
+export const deleteUser=async (req,res) => {
+  try {
+    const {userId}=req.params
+    const deletedUserId=await deleteUserService(userId)
+    return res.status(200).json({
+      success:true,
+      message:'User Deleted Succesfully',
+      deletedUserId
+    })
+  } catch (error) {
+     if (error instanceof ApiError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    // Unexpected errors
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error"
+    })
   }
 }

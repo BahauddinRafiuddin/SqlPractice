@@ -33,3 +33,18 @@ export const getAllUserService = async (currentUserId, page) => {
     users: rows
   }
 }
+
+export const deleteUserService = async (userId) => {
+  const [result] = await pool.query(
+    `DELETE FROM users WHERE id = ? AND role = ?`,
+    [userId, 'user']
+  );
+
+  if (result.affectedRows === 0) {
+    throw new ApiError(404, "User not found or cannot delete admin");
+  }
+
+  return {
+    deletedUserId: userId
+  };
+};
