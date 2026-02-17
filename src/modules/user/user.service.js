@@ -48,3 +48,45 @@ export const deleteUserService = async (userId) => {
     deletedUserId: userId
   };
 };
+
+export const getUserWithTaskService = async (params) => {
+  const [rows] = await pool.query(`
+    SELECT 
+      u.id AS user_id,
+      u.name,
+      u.email,
+      u.role,
+      t.id AS task_id,
+      t.title,
+      t.description,
+      t.created_at AS task_created_at
+    FROM users u
+    INNER JOIN tasks t
+      ON u.id = t.user_id
+    ORDER BY u.id;
+  `)
+
+  const usersMap = {}
+  for (const row of rows) {
+    if (!usersMap[row.user_id]) {
+      usersMap[row.user_id] = {
+        id: row.user_id,
+        name: row.name,
+        email: row.email,
+        role: row.role,
+        tasks: []
+      }
+    }
+
+    if (row.task_id) {
+      usersMap[row.user_id].tasks.push({
+        id: row.task_id,
+        title: row.title,
+        description: row.description,
+        created_at: row.task_created_at
+      });
+    }
+  }
+
+  return Object.values(usersMap);
+}
